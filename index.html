@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcolatore %</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100dvh;
+  background: #0e0e0e;
+  color: #f0f0f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 24px;
+  padding: 36px 28px 32px;
+}
+h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+h1 span { color: #c8f135; }
+.sub { font-size: 0.78rem; color: #555; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 32px; }
+.fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+label { display: block; font-size: 0.72rem; color: #666; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.wrap { position: relative; display: flex; gap: 8px; align-items: center; }
+input[type=text] {
+  flex: 1;
+  background: #0e0e0e;
+  border: 1.5px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 13px 44px 13px 16px;
+  font-size: 1.15rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #f0f0f0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type=text]:focus { border-color: #c8f135; }
+.unit {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: #c8f135; font-weight: 700; font-size: 1.1rem; pointer-events: none;
+}
+/* quando c'è il bottone virgola, sposta l'unità */
+.has-comma .unit { right: 58px; }
+
+.comma-btn {
+  display: none; /* nascosto di default, mostrato solo su iOS via JS */
+  flex-shrink: 0;
+  width: 44px; height: 50px;
+  background: #2a2a2a;
+  border: 1.5px solid #3a3a3a;
+  border-radius: 12px;
+  color: #f0f0f0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.comma-btn:active { background: #c8f135; color: #0e0e0e; }
+
+.btn {
+  width: 100%; padding: 15px; background: #c8f135; color: #0e0e0e;
+  border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
+  font-family: inherit; cursor: pointer; margin-bottom: 20px;
+  transition: opacity 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.97); opacity: 0.85; }
+.result {
+  display: none;
+  background: rgba(200,241,53,0.08);
+  border: 1px solid rgba(200,241,53,0.2);
+  border-radius: 14px;
+  padding: 22px 20px 18px;
+}
+.res-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #c8f135; margin-bottom: 6px; }
+.res-big { font-size: 2.8rem; font-weight: 800; color: #c8f135; line-height: 1; word-break: break-all; margin-bottom: 6px; }
+.res-formula { font-size: 0.8rem; color: #555; margin-bottom: 18px; }
+.extras { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgba(200,241,53,0.15); padding-top: 16px; }
+.row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+.row .k { color: #555; }
+.row .v { font-weight: 600; color: #f0f0f0; }
+.err { display: none; text-align: center; color: #ff6b6b; font-size: 0.85rem; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Calcola la <span>%</span></h1>
+  <p class="sub">Calcolatore percentuale</p>
+  <div class="fields">
+    <div>
+      <label>Percentuale</label>
+      <div class="wrap has-comma" id="percWrap">
+        <input type="text" id="perc" placeholder="es. 2,5" inputmode="numeric" autocomplete="off">
+        <span class="unit">%</span>
+        <button class="comma-btn" id="commaBtn" ontouchstart="addComma()" onclick="addComma()">,</button>
+      </div>
+    </div>
+    <div>
+      <label>Numero base</label>
+      <div class="wrap">
+        <input type="text" id="base" placeholder="es. 50000" inputmode="numeric" autocomplete="off">
+      </div>
+    </div>
+  </div>
+  <p class="err" id="err">Inserisci entrambi i valori</p>
+  <button class="btn" id="btn">Calcola</button>
+  <div class="result" id="result">
+    <p class="res-label">Risultato</p>
+    <p class="res-big" id="resVal"></p>
+    <p class="res-formula" id="resFormula"></p>
+    <div class="extras">
+      <div class="row"><span class="k">Numero originale</span><span class="v" id="eBase"></span></div>
+      <div class="row"><span class="k">+ percentuale</span><span class="v" id="eAdd"></span></div>
+      <div class="row"><span class="k">− percentuale</span><span class="v" id="eSub"></span></div>
+    </div>
+  </div>
+</div>
+<script>
+// Mostra il bottone virgola solo su iOS
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS) {
+  var btn = document.getElementById('commaBtn');
+  btn.style.display = 'flex';
+} else {
+  // Su desktop rimuovi il padding extra del wrap
+  document.getElementById('percWrap').classList.remove('has-comma');
+}
+
+function addComma() {
+  var inp = document.getElementById('perc');
+  if (inp.value.indexOf(',') === -1 && inp.value.indexOf('.') === -1) {
+    inp.value += ',';
+    inp.focus();
+  }
+}
+
+function fmt(n) {
+  return n.toLocaleString('it-IT', {
+    minimumFractionDigits: n % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2
+  });
+}
+function parseNum(s) {
+  return parseFloat(s.trim().replace(',', '.'));
+}
+function calcola() {
+  var p = parseNum(document.getElementById('perc').value);
+  var b = parseNum(document.getElementById('base').value);
+  var err = document.getElementById('err');
+  var res = document.getElementById('result');
+  if (isNaN(p) || isNaN(b)) {
+    err.style.display = 'block';
+    res.style.display = 'none';
+    return;
+  }
+  err.style.display = 'none';
+  var val = (p / 100) * b;
+  document.getElementById('resVal').textContent = fmt(val);
+  document.getElementById('resFormula').textContent = fmt(p) + '% di ' + fmt(b) + ' = ' + fmt(val);
+  document.getElementById('eBase').textContent = fmt(b);
+  document.getElementById('eAdd').textContent = fmt(b + val);
+  document.getElementById('eSub').textContent = fmt(b - val);
+  res.style.display = 'block';
+}
+document.getElementById('btn').addEventListener('click', calcola);
+document.addEventListener('keydown', function(e) { if (e.key === 'Enter') calcola(); });
+</script>
+</body>
+</html>
