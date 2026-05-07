@@ -80,14 +80,14 @@ input[type=text]:focus { border-color: #c8f135; }
     <div>
       <label>Percentuale</label>
       <div class="wrap">
-        <input type="text" id="perc" placeholder="es. 2,5" inputmode="decimal" autocomplete="off">
+        <input type="text" id="perc" placeholder="es. 2,5" inputmode="numeric" autocomplete="off" pattern="[0-9,\.]*">
         <span class="unit">%</span>
       </div>
     </div>
     <div>
       <label>Numero base</label>
       <div class="wrap">
-        <input type="text" id="base" placeholder="es. 50000" inputmode="decimal" autocomplete="off">
+        <input type="text" id="base" placeholder="es. 50000" inputmode="numeric" autocomplete="off" pattern="[0-9,\.]*">
       </div>
     </div>
   </div>
@@ -112,7 +112,6 @@ function fmt(n) {
   });
 }
 function parseNum(s) {
-  // accetta sia virgola che punto come separatore decimale
   return parseFloat(s.trim().replace(',', '.'));
 }
 function calcola() {
